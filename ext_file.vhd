@@ -1,0 +1,35 @@
+library ieee;
+use ieee.std_logic_1164.ALL;
+use ieee.std_logic_arith.ALL;
+use ieee.std_logic_unsigned.ALL;
+
+entity reg_file is
+  	port (
+		i_clk		: in std_logic;
+		write_ext	: in std_logic;
+		i_addr		: in std_logic_vector(2 downto 0);
+		i_data		: in std_logic_vector(15 downto 0);		
+		i_ext		: in std_logic_vector(2 downto 0);
+		q_ext		: out std_logic_vector(15 downto 0)
+	);
+end entity ; -- reg_file
+
+architecture arch of reg_file is
+
+	type regfile_type is array(0 to 3) of std_logic_vector(15 downto 0);
+	signal regfile : regfile_type := (others => (others => '0'));
+
+begin
+
+	process(i_clk)
+	begin
+		if (i_clk = '1' and i_clk'event) then
+			if (write_ext = '1') then
+				regfile(conv_integer(i_addr)) <= i_data;
+			end if;
+		end if;
+	end process ; -- 
+
+	q_ext <= regfile(conv_integer(i_ext));
+
+end architecture ; -- arch

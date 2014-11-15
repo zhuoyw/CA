@@ -218,6 +218,16 @@ begin
 		q_ry => id_ry
 	);
 	
+	ext_file: ext_file 
+	port map(
+		i_clk => sys_clk,
+		write_ext => wb_write_ext,
+		i_addr => wb_rd,
+		i_data => wb_mux_res, 
+		i_ext => id_ext,--??? from controller 
+		q_ext => id_ext
+	);
+
 	--id/ex
 	id_ex_reg: id_ex_reg
 	port map(
