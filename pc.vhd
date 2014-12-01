@@ -12,7 +12,7 @@ end entity ; -- pc
 
 architecture arch of pc is
 
-	signal reg_pc : std_logic_vector(15 downto 0);
+	signal reg_pc : std_logic_vector(15 downto 0) := (others => '0');
 
 begin
 
