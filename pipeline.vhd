@@ -69,13 +69,13 @@ architecture arch of pipeline is
 	signal ex_immd			: std_logic_vector(15 downto 0);
 	signal ex_rx 			: std_logic_vector(15 downto 0);
 	signal ex_ry 			: std_logic_vector(15 downto 0);
-	signal id_t 			: std_logic_vector(15 downto 0);
-	signal id_ra 			: std_logic_vector(15 downto 0);
-	signal id_sp			: std_logic_vector(15 downto 0);
-	signal id_ih 			: std_logic_vector(15 downto 0);
+	signal ex_ra 			: std_logic_vector(15 downto 0);
+	signal ex_sp			: std_logic_vector(15 downto 0);
+	signal ex_ih 			: std_logic_vector(15 downto 0);
 	signal ex_alu_a 		: std_logic_vector(15 downto 0);
 	signal ex_alu_b 		: std_logic_vector(15 downto 0);
-	--constrol ex 
+	signal ex_pc_res 		: std_logic_vector(15 downto 0);
+	--control ex 
 	signal ex_mem_data_src	: std_logic;
 	signal ex_alu_src_a		: std_logic_vector(2 downto 0);
 	signal ex_alu_src_b		: std_logic_vector;
@@ -135,10 +135,114 @@ architecture arch of pipeline is
 	
 	component if_id_reg 
 	port (
-		i_clk		: in std_logic;
-		i_intr		: in std_logic_vector(15 downto 0)
+		i_clk 		: in std_logic; 
+		i_inst 		: in std_logic_vector(15 downto 0);
+		i_pc_res 	: in std_logic_vector(15 downto 0);
+
+		q_inst 		: out std_logic_vector(15 downto 0);
+		q_pc_res 	: out std_logic_vector(15 downto 0)
 	);
 	end component; 
+
+	component id_ex_reg
+	port (
+		i_clk 			: in std_logic;
+		--data
+		i_rx 			: in std_logic_vector(15 downto 0);
+		i_ry 			: in std_logic_vector(15 downto 0);
+		i_ra 			: in std_logic_vector(15 downto 0);
+		i_sp 			: in std_logic_vector(15 downto 0);
+		i_ih 			: in std_logic_vector(15 downto 0);
+		i_pc_res		: in std_logic_vector(15 downto 0);
+		--control id
+		i_mem_data_src	: in std_logic;
+		i_alu_src_a 	: in std_logic_vector(2 downto 0);
+		i_alu_src_b 	: in std_logic;
+		i_alu_opcode 	: in std_logic_vector(3 downto 0);
+		i_mem_to_reg 	: in std_logic;
+		i_read_mem 		: in std_logic;
+		i_write_mem 	: in std_logic;
+		i_write_reg 	: in std_logic;
+		i_write_ext 	: in std_logic;
+		i_rd 			: in std_logic_vector(2 downto 0);
+		i_immd 			: in std_logic_vector(15 downto 0);
+		
+		q_rx 			: out std_logic_vector(15 downto 0);
+		q_ry 			: out std_logic_vector(15 downto 0);
+		q_ra 			: out std_logic_vector(15 downto 0);
+		q_sp 			: out std_logic_vector(15 downto 0);
+		q_ih 			: out std_logic_vector(15 downto 0);
+		q_pc_res		: out std_logic_vector(15 downto 0);
+		
+		q_mem_data_src	: out std_logic;
+		q_alu_src_a 	: out std_logic_vector(2 downto 0);
+		q_alu_src_b 	: out std_logic;
+		q_alu_opcode 	: out std_logic_vector(3 downto 0);
+		q_mem_to_reg 	: out std_logic;
+		q_read_mem 		: out std_logic;
+		q_write_mem 	: out std_logic;
+		q_write_reg 	: out std_logic;
+		q_write_ext 	: out std_logic;
+		q_rd 			: out std_logic_vector(2 downto 0);
+		q_immd 			: out std_logic_vector(15 downto 0)
+	);
+	end component;
+
+	component ex_me_reg
+	port (
+		i_clk 			: in std_logic;
+		--data
+		i_alu_res		: in std_logic_vector(15 downto 0);
+		i_mem_data		: in std_logic_vector(15 downto 0);
+		
+		--control
+		i_mem_to_reg 	: in std_logic;
+		i_read_mem 		: in std_logic;
+		i_write_mem 	: in std_logic;
+		i_write_reg 	: in std_logic;
+		i_write_ext 	: in std_logic;
+		i_rd 			: in std_logic_vector(2 downto 0);
+		
+		--data
+		q_alu_res		: out std_logic_vector(15 downto 0);
+		q_mem_data		: out std_logic_vector(15 downto 0);
+		
+		--control
+		q_mem_to_reg 	: out std_logic;
+		q_read_mem 		: out std_logic;
+		q_write_mem 	: out std_logic;
+		q_write_reg 	: out std_logic;
+		q_write_ext 	: out std_logic;
+		q_rd 			: out std_logic_vector(2 downto 0)
+
+	);
+	end component; -- ex_me_reg
+
+	component me_wb_reg is
+	port (
+		i_clk 			: in std_logic;
+		--data
+		i_alu_res		: in std_logic_vector(15 downto 0);
+		i_mem_res		: in std_logic_vector(15 downto 0);
+		
+		--control
+		i_mem_to_reg 	: in std_logic;
+		i_write_reg 	: in std_logic;
+		i_write_ext 	: in std_logic;
+		i_rd 			: in std_logic_vector(2 downto 0);
+		
+		--data
+		q_alu_res		: out std_logic_vector(15 downto 0);
+		q_mem_res		: out std_logic_vector(15 downto 0);
+		
+		--control
+		q_mem_to_reg 	: out std_logic;
+		q_write_reg 	: out std_logic;
+		q_write_ext 	: out std_logic;
+		q_rd 			: out std_logic_vector(2 downto 0)
+
+	);
+	end component; -- me_wb_reg
 
 	component reg_file
 	port(
@@ -277,10 +381,10 @@ begin
 	if_id_reg: if_id_reg 
 	port map(
 		i_clk => sys_clk, 
-		i_intr => if_inst,
+		i_inst => if_inst,
 		i_pc_res => if_pc_res,
 
-		q_intr => id_inst,
+		q_inst => id_inst,
 		q_pc_res => id_pc_res
 	);
 
@@ -370,10 +474,10 @@ begin
 		--data
 		i_rx => id_rx,
 		i_ry =>	id_ry,
-		i_t => id_t,
 		i_ra => id_ra,
 		i_sp => id_sp,
 		i_ih => id_ih,
+		i_pc_res => id_pc_res,
 		--control id
 		i_mem_data_src => id_mem_data_src,
 		i_alu_src_a => id_alu_src_a,
@@ -389,10 +493,10 @@ begin
 		
 		q_rx => ex_rx,
 		q_ry => ex_ry,
-		q_t => ex_t,
 		q_ra => ex_ra,
 		q_sp => ex_sp,
 		q_ih => ex_ih,
+		q_pc_res => ex_pc_res,
 		q_mem_data_src => ex_mem_to_reg,
 		q_alu_src_a => ex_alu_src_a,
 		q_alu_src_b => ex_alu_src_b,
