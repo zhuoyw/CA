@@ -39,7 +39,7 @@ begin
 					when "011" =>
 						reg_ih <= i_data;
 					when others =>
-						reg_t <= i_data;
+						reg_t <= (others=>'1');
 						--raise error
 				end case ;
 			end if;

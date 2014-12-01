@@ -79,7 +79,7 @@ architecture arch of pipeline is
 	signal ex_mem_data_src	: std_logic;
 	signal ex_alu_src_a		: std_logic_vector(2 downto 0);
 	signal ex_alu_src_b		: std_logic_vector;
-	signal ex_alu_opcode	: std_logic_vector(3 downto 0);
+	signal ex_alu_opcode		: std_logic_vector(3 downto 0);
 	signal ex_read_mem		: std_logic;
 	signal ex_write_mem		: std_logic;
 	signal ex_write_reg		: std_logic;
@@ -227,9 +227,7 @@ begin
 	);
 
 	--data
-	--if
-	
-
+	--pc
 	pc: pc
 	port map(
 		i_clk => sys_clk,
@@ -258,6 +256,7 @@ begin
 		end case ;
 	end process;
 
+	--if
 	inst_mem: sram_controller
 	port map(
 		i_clk => clk,
@@ -536,7 +535,7 @@ begin
 			when '1' =>
 				wb_mux_res <= wb_mem_res;
 			when others =>	
-				wb_mux_res <= wb_alu_res;
+				wb_mux_res <= (others=>'1');
 				--raise error
 		end case;
 	end process;
