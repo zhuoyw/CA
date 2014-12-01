@@ -232,8 +232,8 @@ begin
 
 	pc: pc
 	port map(
-		i_clk => sys_clk;
-		i_rst => rst;
+		i_clk => sys_clk,
+		i_rst => rst,
 		i_pc => if_pc_mux_res,
 		q_pc => if_pc_res
 	);
@@ -292,7 +292,7 @@ begin
 		inst => id_inst,
 
 		branch => id_branch,
-		mem_data_src => id_mem_data_src;
+		mem_data_src => id_mem_data_src,
 		alu_src_a => id_alu_src_a,
 		alu_src_b => id_alu_src_b,
 		alu_opcode => id_alu_opcode,
@@ -454,7 +454,7 @@ begin
 
 	process(ex_mem_data_src)
 	begin
-		case(ex_mem_data_src)
+		case(ex_mem_data_src) is
 			when '0' =>
 				ex_mux_res <= ex_rx;
 			when '1' =>

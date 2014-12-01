@@ -46,7 +46,7 @@ begin
 						mem_we <= '1';
 						mem_addr <= i_addr;
 						mem_data <= (others => 'Z');
-					elsif
+					else
 						reg_state <= s0;
 						mem_en <= '1';
 						mem_oe <= '1';

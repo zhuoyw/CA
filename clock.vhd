@@ -11,7 +11,7 @@ end entity ; -- clock
 architecture bhv of clock is
 
 	signal clk4 : std_logic := '0';
-	signal counter : range 0 to 3 integer := 0; 
+	signal counter : integer range 0 to 3 := 0; 
 
 begin
 

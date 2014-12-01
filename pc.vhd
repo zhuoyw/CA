@@ -21,7 +21,7 @@ begin
 		if (rst = '1') then
 			reg_pc <= (others => '0');
 		elsif (i_clk = '1' and i_clk'event) then
-			reg_pc <= 
+			reg_pc <= i_pc;
 		end if;
 	end process;
 
