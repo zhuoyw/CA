@@ -2,12 +2,12 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity pc is
-  port (
-	i_clk		: in std_logic;
-	i_rst		: in std_logic;
-	i_pc		: in std_logic;
-	q_pc		: out std_logic_vector(15 downto 0)
-  ) ;
+	port (
+		i_clk		: in std_logic;
+		i_rst		: in std_logic;
+		i_pc		: in std_logic;
+		q_pc		: out std_logic_vector(15 downto 0)
+	);
 end entity ; -- pc
 
 architecture arch of pc is

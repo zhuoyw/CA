@@ -2,10 +2,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 
-entity mem_controller is
+entity sram_controller is
 	port (
 		--from/to upper
-		clk				: in std_logic;
+		i_clk			: in std_logic;
 		i_addr			: in std_logic_vector(15 downto 0);
 		i_data 			: in std_logic_vector(15 downto 0);
 		q_data 			: out std_logic_vector(15 downto 0);
@@ -19,9 +19,9 @@ entity mem_controller is
 		mem_en 			: out std_logic
     );
 	
-end mem_controller;
+end sram_controller;
 
-architecture bhv of mem_controller is
+architecture bhv of sram_controller is
 	
 	type state_tpye is (s0, r1, r2, r3, w1, w2, w3);
 	signal reg_state : state_tpye := s0;
@@ -69,6 +69,9 @@ begin
 					q_data <= mem_data;
 				when others =>
 					reg_state <= s0;
+					mem_en <= '1';
+					mem_oe <= '1';
+					mem_we <= '1';
 			end case;
 		end if;
 	end process;     
