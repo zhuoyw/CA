@@ -77,10 +77,22 @@ architecture arch of partpipe is
 	signal ex_rd 			: std_logic_vector(2 downto 0);
 	signal ex_mem_to_reg	: std_logic;
 	--data ex out
-	--signal ex_alu_res		: std_logic_vector(15 downto 0);
-	--signal ex_mux_res		: std_logic_vector(15 downto 0);
+	signal ex_alu_res		: std_logic_vector(15 downto 0);
+	signal ex_mux_res		: std_logic_vector(15 downto 0);
 	signal ex_flag			: std_logic;
 
+	signal me_data		: std_logic_vector(15 downto 0);
+	--contrl me in
+	signal me_read_mem		: std_logic;
+	signal me_write_mem	: std_logic;
+	signal me_alu_res		: std_logic_vector(15 downto 0);
+	signal me_mem_res		: std_logic_vector(15 downto 0);
+	--control me out
+	signal me_write_reg	: std_logic;
+	signal me_write_ext	: std_logic;
+	signal me_rd 			: std_logic_vector(2 downto 0);
+	signal me_mem_to_reg	: std_logic;
+	
 	component clock
 	port (
 		i_clk		: in std_logic;
@@ -377,9 +389,9 @@ begin
 	u_reg_file: reg_file 
 	port map(
 		i_clk => sys_clk,
-		write_reg => wb_write_reg,
-		i_addr => wb_rd,
-		i_data => wb_mux_res, 
+		write_reg => '0',
+		i_addr => "000",
+		i_data => (others=>'0'), 
 		i_rx => id_inst(10 downto 8), 
 		i_ry => id_inst(7 downto 5),
 		q_rx => id_rx,
@@ -389,9 +401,9 @@ begin
 	u_ext_file: ext_file 
 	port map(
 		i_clk => sys_clk,
-		write_ext => wb_write_ext,
-		i_addr => wb_rd,
-		i_data => wb_mux_res, 
+		write_ext => '0',
+		i_addr => "000",
+		i_data => (others=>'0'), 
 		q_t => id_t,
 		q_ra => id_ra,
 		q_sp => id_sp,
