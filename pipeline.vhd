@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 entity pipeline is
   port (
@@ -78,7 +79,7 @@ architecture arch of pipeline is
 	--control ex 
 	signal ex_mem_data_src	: std_logic;
 	signal ex_alu_src_a		: std_logic_vector(2 downto 0);
-	signal ex_alu_src_b		: std_logic_vector;
+	signal ex_alu_src_b		: std_logic;
 	signal ex_alu_opcode		: std_logic_vector(3 downto 0);
 	signal ex_read_mem		: std_logic;
 	signal ex_write_mem		: std_logic;
@@ -93,7 +94,6 @@ architecture arch of pipeline is
 
 	--data me in
 	signal me_data		: std_logic_vector(15 downto 0);
-	signal me_addr		: std_logic_vector(15 downto 0);
 	--contrl me in
 	signal me_read_mem		: std_logic;
 	signal me_write_mem	: std_logic;
@@ -128,7 +128,7 @@ architecture arch of pipeline is
 	port (
 		i_clk		: in std_logic;
 		i_rst		: in std_logic;
-		i_pc		: in std_logic;
+		i_pc		: in std_logic_vector(15 downto 0);
 		q_pc		: out std_logic_vector(15 downto 0)
 	);
 	end component;
@@ -304,6 +304,21 @@ architecture arch of pipeline is
 		) ;
 	end component;
 
+	component im_controller is
+	port (
+		--from/to upper
+		i_clk			: in std_logic;
+		i_addr			: in std_logic_vector(15 downto 0);
+		q_data 			: out std_logic_vector(15 downto 0);
+		--from/to mem
+		sram_data 		: inout std_logic_vector(15 downto 0);
+		sram_addr 		: out std_logic_vector(15 downto 0);
+		sram_oe 			: out std_logic;
+		sram_we 			: out std_logic;
+		sram_en 			: out std_logic
+    );
+	end component;
+
 	component sram_controller
 	port (
 		--from/to upper
@@ -324,7 +339,7 @@ architecture arch of pipeline is
 
 begin
 	--clock
-	clock: clock
+	u_clock: clock
 	port map(
 		i_clk => clk,
 		q_clk => sys_clk
@@ -332,7 +347,7 @@ begin
 
 	--data
 	--pc
-	pc: pc
+	u_pc: pc
 	port map(
 		i_clk => sys_clk,
 		i_rst => rst,
@@ -341,9 +356,9 @@ begin
 	);
 
 	id_pc_plus_immd <= id_pc_res + id_immd;
-	if_pc_plus_4 <= if_pc_res + (0=>'1', others=>'0');
+	if_pc_plus_4 <= if_pc_res + "0000000000000001";
 
-	process(id_pc_src)
+	process(id_pc_src)--??
 	begin
 		case(id_pc_src) is
 			when "00" =>
@@ -361,14 +376,11 @@ begin
 	end process;
 
 	--if
-	inst_mem: sram_controller
+	u_inst_mem: im_controller
 	port map(
 		i_clk => clk,
 		i_addr => if_pc_res,
-		i_data => (others => 'Z'),
 		q_data => if_inst,
-		write_mem => '0',
-		read_mem => '1',
 
 		sram_data => sram0_data, 
 		sram_addr => sram0_addr,
@@ -378,7 +390,7 @@ begin
 	);
 
 	--if/id
-	if_id_reg: if_id_reg 
+	u_if_id_reg: if_id_reg 
 	port map(
 		i_clk => sys_clk, 
 		i_inst => if_inst,
@@ -390,7 +402,7 @@ begin
 
 	--id
 	--control
-	controller: controller
+	u_controller: controller
 	port map(
 		inst => id_inst,
 
@@ -416,19 +428,19 @@ begin
 			when "001" => 
 				id_pc_src <= "01";
 			when "010" =>
-				if (id_rx = (others=>'0')) then
+				if (id_rx = "0000000000000000") then
 					id_pc_src <= "01";
 				else
 					id_pc_src <= "00";
 				end if;
 			when "011" =>
-				if (id_rx = (others=>'0')) then
+				if (id_rx = "0000000000000000") then
 					id_pc_src <= "00";
 				else
 					id_pc_src <= "01";
 				end if;
 			when "100" =>
-				if (id_t = (others=>'0')) then
+				if (id_t = "0000000000000000") then
 					id_pc_src <= "01";
 				else
 					id_pc_src <= "00";
@@ -443,7 +455,7 @@ begin
 		end case ;
 	end process;
 	
-	reg_file: reg_file 
+	u_reg_file: reg_file 
 	port map(
 		i_clk => sys_clk,
 		write_reg => wb_write_reg,
@@ -455,7 +467,7 @@ begin
 		q_ry => id_ry
 	);
 	
-	ext_file: ext_file 
+	u_ext_file: ext_file 
 	port map(
 		i_clk => sys_clk,
 		write_ext => wb_write_ext,
@@ -468,7 +480,7 @@ begin
 	);
 
 	--id/ex
-	id_ex_reg: id_ex_reg
+	u_id_ex_reg: id_ex_reg
 	port map(
 		i_clk => sys_clk,
 		--data
@@ -497,7 +509,7 @@ begin
 		q_sp => ex_sp,
 		q_ih => ex_ih,
 		q_pc_res => ex_pc_res,
-		q_mem_data_src => ex_mem_to_reg,
+		q_mem_data_src => ex_mem_data_src,
 		q_alu_src_a => ex_alu_src_a,
 		q_alu_src_b => ex_alu_src_b,
 		q_alu_opcode => ex_alu_opcode,
@@ -511,9 +523,9 @@ begin
 	);
 
 	--ex
-	process(alu_src_a)
+	process(ex_alu_src_a)
 	begin
-		case alu_src_a is
+		case ex_alu_src_a is
 			when "000" => 
 				ex_alu_a <= ex_rx;
 			when "001" =>
@@ -523,7 +535,7 @@ begin
 			when "011" =>
 				ex_alu_a <= ex_sp;
 			when "100"  =>
-				ex_alu_a <= ex_pc;
+				ex_alu_a <= ex_pc_res;
 			when "101" =>
 				ex_alu_a <= (others=>'0');
 			when "110" =>
@@ -533,9 +545,9 @@ begin
 		end case;
 	end process;
 
-	process(alu_src_b)
+	process(ex_alu_src_b)
 	begin
-		case alu_src_b is
+		case ex_alu_src_b is
 			when '0' =>
 				ex_alu_b <= ex_immd;
 			when '1' =>
@@ -546,7 +558,7 @@ begin
 		end case;
 	end process;
 
-	alu: alu
+	u_alu: alu
 	port map(
 		i_alu_a => ex_alu_a,
 		i_alu_b => ex_alu_b,
@@ -568,7 +580,7 @@ begin
 		end case;
 	end process;
 	--ex/me
-	ex_me_reg: ex_me_reg
+	u_ex_me_reg: ex_me_reg
 	port map(
 		i_clk => sys_clk,
 		--data
@@ -580,10 +592,9 @@ begin
 		i_write_mem => ex_write_mem,
 		i_write_reg => ex_write_reg,
 		i_write_ext => ex_write_ext,
-		i_rd => id_rd,
+		i_rd => ex_rd,
 		
 		q_alu_res => me_alu_res,
-		q_mem_addr => me_addr,
 		q_mem_data => me_data,
 		q_mem_to_reg => me_mem_to_reg,
 		q_read_mem => me_read_mem,
@@ -594,10 +605,10 @@ begin
 	);
 
 	--me
-	data_mem: sram_controller
+	u_data_mem: sram_controller
 	port map(
 		i_clk => clk,
-		i_addr => me_addr,
+		i_addr => me_alu_res,
 		i_data => me_data,
 		q_data => me_mem_res,
 		write_mem => me_write_mem,
@@ -611,7 +622,7 @@ begin
 	);
 
 	--me/wb
-	me_wb_reg: me_wb_reg
+	u_me_wb_reg: me_wb_reg
 	port map(
 		i_clk => sys_clk,
 		--data

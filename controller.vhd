@@ -7,7 +7,7 @@ entity controller is
   port (
 	inst			: in std_logic_vector(15 downto 0);
 	branch			: out std_logic_vector(2 downto 0);
-	--mem_data_src 	: '0'->rx; '1'->ry
+	--mem_data_sexrc 	: '0'->rx; '1'->ry
 	mem_data_src	: out std_logic;
 	--alu_src_a     : "000"->rx;	"001"->ry;	"010"->ra; "011"->sp;	"100"->pc
 	alu_src_a		: out std_logic_vector(2 downto 0);
