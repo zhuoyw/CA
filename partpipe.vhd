@@ -301,7 +301,7 @@ begin
 	id_pc_plus_immd <= id_pc_res + id_immd;
 	if_pc_plus_4 <= if_pc_res + "0000000000000001";
 
-	process(id_pc_src)--??
+	process(id_pc_src, if_pc_plus_4, id_pc_plus_immd, id_rx, id_ra)
 	begin
 		case(id_pc_src) is
 			when "00" =>
