@@ -40,21 +40,9 @@ architecture arch_alu of alu is
     signal wire_sra          : std_logic_vector(15 downto 0) := "0000000000000000";
 	signal wire_lt			 : std_logic_vector(15 downto 0) := "0000000000000000";
 	signal wire_equ			 : std_logic_vector(15 downto 0) := "0000000000000000";
-	 
-    --signal i_alu_c    		  : std_logic_vector(15 downto 0);
-	 --signal cin_add			  : std_logic := '0';
-	 --signal cin_sub			  : std_logic := '1';
-	 --component adders
-		--Port ( 
-			--i_alu_a : in  STD_LOGIC_VECTOR(15 downto 0);
-			--i_alu_b : in  STD_LOGIC_VECTOR(15 downto 0);
-			--i_cin : in 	STD_LOGIC;
-			--q_alu_res : out  STD_LOGIC_VECTOR(15 downto 0)
-		--);
-	 --end component;
 
 begin
-    process(i_alu_opcode)
+    process(i_alu_opcode, wire_add, wire_sub, wire_and, wire_or, wire_sll, wire_sra, wire_lt, wire_equ)
     begin
         case(i_alu_opcode) is
             when ALU_ADD =>
