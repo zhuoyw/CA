@@ -498,7 +498,7 @@ begin
 		q_alu_flag => ex_flag
 	);
 
-	process(ex_mem_data_src)
+	process(ex_mem_data_src, ex_rx, ex_ry)
 	begin
 		case(ex_mem_data_src) is
 			when '0' =>
