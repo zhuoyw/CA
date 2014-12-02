@@ -93,6 +93,18 @@ architecture arch of partpipe is
 	signal me_rd 			: std_logic_vector(2 downto 0);
 	signal me_mem_to_reg	: std_logic;
 	
+	--data wb in
+	signal wb_mem_res		: std_logic_vector(15 downto 0);
+	signal wb_alu_res		: std_logic_vector(15 downto 0);
+	--control wb in 
+	signal wb_write_reg	: std_logic;
+	signal wb_write_ext	: std_logic;
+	signal wb_rd 			: std_logic_vector(2 downto 0);
+	signal wb_mem_to_reg	: std_logic;
+	--data wb out
+	signal wb_mux_res	: std_logic_vector(15 downto 0);
+
+
 	component clock
 	port (
 		i_clk		: in std_logic;
@@ -389,9 +401,9 @@ begin
 	u_reg_file: reg_file 
 	port map(
 		i_clk => sys_clk,
-		write_reg => '0',
-		i_addr => "000",
-		i_data => (others=>'0'), 
+		write_reg => wb_write_reg,
+		i_addr => wb_rd,
+		i_data => wb_mux_res, 
 		i_rx => id_inst(10 downto 8), 
 		i_ry => id_inst(7 downto 5),
 		q_rx => id_rx,
@@ -401,9 +413,9 @@ begin
 	u_ext_file: ext_file 
 	port map(
 		i_clk => sys_clk,
-		write_ext => '0',
-		i_addr => "000",
-		i_data => (others=>'0'), 
+		write_ext => wb_write_ext,
+		i_addr => wb_rd,
+		i_data => wb_mux_res, 
 		q_t => id_t,
 		q_ra => id_ra,
 		q_sp => id_sp,
@@ -534,5 +546,39 @@ begin
 		q_write_ext => me_write_ext,
 		q_rd => me_rd
 	);
+
+	--me/wb
+	u_me_wb_reg: me_wb_reg
+	port map(
+		i_clk => sys_clk,
+		--data
+		i_mem_res => me_mem_res,
+		i_alu_res => me_alu_res,
+		--control
+		i_mem_to_reg => me_mem_to_reg,
+		i_write_reg => me_write_reg,
+		i_write_ext => me_write_ext,
+		i_rd => me_rd,
+		
+		q_mem_res => wb_mem_res,
+		q_alu_res => wb_alu_res,
+		q_mem_to_reg => wb_mem_to_reg,
+		q_write_reg => wb_write_reg,
+		q_write_ext => wb_write_ext,
+		q_rd => wb_rd
+	);
+
+	process(wb_mem_to_reg, wb_alu_res, wb_mem_res)
+	begin
+		case wb_mem_to_reg is
+			when '0' =>
+				wb_mux_res <= wb_alu_res;
+			when '1' =>
+				wb_mux_res <= wb_mem_res;
+			when others =>	
+				wb_mux_res <= (others=>'1');
+				--raise error
+		end case;
+	end process;
 
 end architecture ; -- arch
