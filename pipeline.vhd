@@ -523,7 +523,7 @@ begin
 	);
 
 	--ex
-	process(ex_alu_src_a)
+	process(ex_alu_src_a, ex_rx, ex_ry, ex_ra, ex_sp, ex_pc_res, ex_ih)
 	begin
 		case ex_alu_src_a is
 			when "000" => 
@@ -545,7 +545,7 @@ begin
 		end case;
 	end process;
 
-	process(ex_alu_src_b)
+	process(ex_alu_src_b, ex_immd, ex_ry)
 	begin
 		case ex_alu_src_b is
 			when '0' =>
@@ -642,7 +642,7 @@ begin
 		q_rd => wb_rd
 	);
 
-	process(wb_mem_to_reg)
+	process(wb_mem_to_reg, wb_alu_res, wb_mem_res)
 	begin
 		case wb_mem_to_reg is
 			when '0' =>
