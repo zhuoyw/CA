@@ -14,8 +14,8 @@ entity if_id_reg is
 end if_id_reg; -- if_id_reg
 
 architecture arch of if_id_reg is
-	signal reg_inst	: std_logic_vector(15 downto 0):="0000000000000000";
-	signal reg_pc_res	: std_logic_vector(15 downto 0):="0000000000000000";
+	signal reg_inst	: std_logic_vector(15 downto 0):=(others => '0');
+	signal reg_pc_res	: std_logic_vector(15 downto 0):=(others => '0');
 
 begin
 

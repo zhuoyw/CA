@@ -48,24 +48,24 @@ end id_ex_reg; -- id_ex_reg
 
 architecture arch of id_ex_reg is
 	--data
-	signal reg_rx 			: std_logic_vector(15 downto 0);
-	signal reg_ry 			: std_logic_vector(15 downto 0);
-	signal reg_ra 			: std_logic_vector(15 downto 0);
-	signal reg_sp 			: std_logic_vector(15 downto 0);
-	signal reg_ih 			: std_logic_vector(15 downto 0);
-	signal reg_pc_res		: std_logic_vector(15 downto 0);
+	signal reg_rx 			: std_logic_vector(15 downto 0):=(others => '0');
+	signal reg_ry 			: std_logic_vector(15 downto 0):=(others => '0');
+	signal reg_ra 			: std_logic_vector(15 downto 0):=(others => '0');
+	signal reg_sp 			: std_logic_vector(15 downto 0):=(others => '0');
+	signal reg_ih 			: std_logic_vector(15 downto 0):=(others => '0');
+	signal reg_pc_res		: std_logic_vector(15 downto 0):=(others => '0');
 	--control
-	signal reg_mem_data_src	: std_logic;
-	signal reg_alu_src_a 	: std_logic_vector(2 downto 0);
-	signal reg_alu_src_b 	: std_logic;
-	signal reg_alu_opcode 	: std_logic_vector(3 downto 0);
-	signal reg_mem_to_reg 	: std_logic;
-	signal reg_read_mem 	: std_logic;
-	signal reg_write_mem 	: std_logic;
-	signal reg_write_reg 	: std_logic;
-	signal reg_write_ext 	: std_logic;
-	signal reg_rd 			: std_logic_vector(2 downto 0);
-	signal reg_immd 		: std_logic_vector(15 downto 0);
+	signal reg_mem_data_src	: std_logic:='0';
+	signal reg_alu_src_a 	: std_logic_vector(2 downto 0):=(others => '0');
+	signal reg_alu_src_b 	: std_logic:='0';
+	signal reg_alu_opcode 	: std_logic_vector(3 downto 0):=(others => '0');
+	signal reg_mem_to_reg 	: std_logic:='0';
+	signal reg_read_mem 	: std_logic:='0';
+	signal reg_write_mem 	: std_logic:='0';
+	signal reg_write_reg 	: std_logic:='0';
+	signal reg_write_ext 	: std_logic:='0';
+	signal reg_rd 			: std_logic_vector(2 downto 0):=(others => '0');
+	signal reg_immd 		: std_logic_vector(15 downto 0):=(others => '0');
 
 begin
 

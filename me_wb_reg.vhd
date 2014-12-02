@@ -30,14 +30,14 @@ end me_wb_reg; -- me_wb_reg
 
 architecture arch of me_wb_reg is
 	--data
-	signal reg_alu_res		: std_logic_vector(15 downto 0);
-	signal reg_mem_res		: std_logic_vector(15 downto 0);
+	signal reg_alu_res		: std_logic_vector(15 downto 0):=(others => '0');
+	signal reg_mem_res		: std_logic_vector(15 downto 0):=(others => '0');
 	
 	--control
-	signal reg_mem_to_reg 	: std_logic;
-	signal reg_write_reg 	: std_logic;
-	signal reg_write_ext 	: std_logic;
-	signal reg_rd 			: std_logic_vector(2 downto 0);
+	signal reg_mem_to_reg 	: std_logic:='0';
+	signal reg_write_reg 	: std_logic:='0';
+	signal reg_write_ext 	: std_logic:='0';
+	signal reg_rd 			: std_logic_vector(2 downto 0):=(others => '0');
 
 begin
 
