@@ -18,7 +18,7 @@ end entity ; -- ext_file
 
 architecture arch of ext_file is
 
-	signal reg_t 	: std_logic_vector(15 downto 0) := (others=>'0');
+	signal reg_t 	: std_logic_vector(15 downto 0) := ("0000000000000010");
 	signal reg_ra 	: std_logic_vector(15 downto 0) := (others=>'0');
 	signal reg_sp	: std_logic_vector(15 downto 0) := (others=>'0');
 	signal reg_ih	: std_logic_vector(15 downto 0) := (others=>'0');
