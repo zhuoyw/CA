@@ -1,6 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL; 
-use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity reg_file is
@@ -41,8 +41,8 @@ begin
 
 	q_rx <= regfile(conv_integer(i_rx_addr));
 	q_ry <= regfile(conv_integer(i_ry_addr));
-	q_t <= regfile(conv_integer("1000"));
-	q_ra <= regfile(conv_integer("1001"));
+	q_t <= regfile(8);
+	q_ra <= regfile(9);
 	
 end architecture ; -- arch
 

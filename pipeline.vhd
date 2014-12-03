@@ -70,6 +70,8 @@ architecture arch of pipeline is
 	signal ex_immd			: std_logic_vector(15 downto 0);
 	signal ex_rx 			: std_logic_vector(15 downto 0);
 	signal ex_ry 			: std_logic_vector(15 downto 0);
+	signal ex_rx_new 			: std_logic_vector(15 downto 0);
+	signal ex_ry_new 			: std_logic_vector(15 downto 0);
 	signal ex_alu_a 		: std_logic_vector(15 downto 0);
 	signal ex_alu_b 		: std_logic_vector(15 downto 0);
 	signal ex_pc_res 		: std_logic_vector(15 downto 0);
@@ -169,8 +171,8 @@ architecture arch of pipeline is
 		q_ry 			: out std_logic_vector(15 downto 0);
 		q_pc_res		: out std_logic_vector(15 downto 0);
 		q_immd 			: out std_logic_vector(15 downto 0);
-		q_rx_addr 		: in std_logic_vector(3 downto 0);
-		q_ry_addr 		: in std_logic_vector(3 downto 0);
+		q_rx_addr 		: out std_logic_vector(3 downto 0);
+		q_ry_addr 		: out std_logic_vector(3 downto 0);
 
 		q_mem_data_src	: out std_logic;
 		q_alu_src_a 	: out std_logic;
@@ -264,24 +266,26 @@ architecture arch of pipeline is
 
 	component controller is
 		port (
-		inst			: in std_logic_vector(15 downto 0);
-		branch			: out std_logic_vector(2 downto 0);
-		--mem_data_src 	: '0'->rx; '1'->ry
-		mem_data_src	: out std_logic;
-		--alu_src_a     : "000"->rx;	"001"->ry;	"010"->ra; "011"->sp;	"100"->pc
-		alu_src_a		: out std_logic_vector(2 downto 0);
-		--alu_src_b     : '0'->immd;	'1'->ry
-		alu_src_b		: out std_logic;
-		--alu_opcode	: "0000"->add;	"0001"->sub;	"0010"->and;	"0011"->or;	"0100"->eqz;	"0101"->neqz;					  "0110"->lte;	"0111"->equ;	"1000"->sll;					  "1001"->sra	
-		alu_opcode		: out std_logic_vector(3 downto 0);
-		mem_to_reg		: out std_logic;
-		read_mem		: out std_logic;
-		write_mem		: out std_logic;
-		write_reg		: out std_logic;
-		--rd 			: "000"~"111"->r0~r7; "001"->ra; "010"->sp;	"011"->ih; "000"->t			
-		rd          	: out std_logic_vector(2 downto 0);
-		immd			: out std_logic_vector(15 downto 0)
-		) ;
+			inst			: in std_logic_vector(15 downto 0);
+			branch			: out std_logic_vector(2 downto 0);
+			--mem_data_sexrc: '0'->rx; '1'->ry
+			mem_data_src	: out std_logic;
+			--alu_src_a     : '0'->pc_res;	'1'->rx
+			alu_src_a		: out std_logic;
+			--alu_src_b     : '0'->immd;	'1'->ry
+			alu_src_b		: out std_logic;
+			--alu_opcode	: "0000"->add;	"0001"->sub;	"0010"->and;	"0011"->or;	"0100"->eqz;	"0101"->neqz;					  "0110"->lte;	"0111"->equ;	"1000"->sll;					  "1001"->sra	
+			alu_opcode		: out std_logic_vector(3 downto 0);
+			mem_to_reg		: out std_logic;
+			read_mem		: out std_logic;
+			write_mem		: out std_logic;
+			write_reg		: out std_logic;
+			--addr/rd 		: "0000"~"0111"->r0~r7;	"1000"->t;	"1001"->ra; "1010"->sp;	"1011"->ih; "1111"->zero			
+			rx_addr			: out std_logic_vector(3 downto 0);
+			ry_addr			: out std_logic_vector(3 downto 0);
+			rd          	: out std_logic_vector(3 downto 0);
+			immd			: out std_logic_vector(15 downto 0)
+		  ) ;
 	end component;
 
 	component im_controller is
@@ -407,6 +411,8 @@ begin
 		read_mem => id_read_mem,
 		write_mem => id_write_mem,		
 		write_reg => id_write_reg,
+		rx_addr => id_rx_addr,
+		ry_addr => id_ry_addr,
 		rd => id_rd,
 		immd => id_immd
 	);
@@ -515,26 +521,55 @@ begin
 		q_forward_b => ex_forward_b
 	);
 
-	process(ex_alu_src_a, ex_rx, ex_pc_res)
+
+	process(ex_forward_a, ex_rx, me_alu_res, wb_mux_res)
+	begin
+		case(ex_forward_a) is
+			when "00" =>
+				ex_rx_new <= ex_rx;
+			when "01" =>
+				ex_rx_new <= me_alu_res;
+			when "10" =>
+				ex_rx_new <= wb_mux_res;
+			when others =>
+				ex_rx_new <= ex_rx;
+		end case;
+	end process;
+
+	process(ex_forward_b, ex_ry, me_alu_res, wb_mux_res)
+	begin
+		case(ex_forward_b) is
+			when "00" =>
+				ex_ry_new <= ex_ry;
+			when "01" =>
+				ex_ry_new <= me_alu_res;
+			when "10" =>
+				ex_ry_new <= wb_mux_res;
+			when others =>
+				ex_ry_new <= ex_ry;
+		end case;
+	end process;
+
+	process(ex_alu_src_a, ex_rx_new, ex_pc_res)
 	begin
 		case ex_alu_src_a is
 			when '0' => 
-				ex_alu_a <= ex_rx;
-			when '1' =>
 				ex_alu_a <= ex_pc_res;
+			when '1' =>
+				ex_alu_a <= ex_rx_new;
 			when others => 
 				ex_alu_a <= (others=>'1'); 
 				--raise error
 		end case;
 	end process;
 
-	process(ex_alu_src_b, ex_immd, ex_ry)
+	process(ex_alu_src_b, ex_immd, ex_ry_new)
 	begin
 		case ex_alu_src_b is
 			when '0' =>
 				ex_alu_b <= ex_immd;
 			when '1' =>
-				ex_alu_b <= ex_ry;
+				ex_alu_b <= ex_ry_new;
 			when others =>
 				ex_alu_b <= (others=>'1');
 				--raise error
@@ -550,13 +585,13 @@ begin
 		q_alu_flag => ex_flag
 	);
 
-	process(ex_mem_data_src, ex_rx, ex_ry)
+	process(ex_mem_data_src, ex_rx_new, ex_ry_new)
 	begin
 		case(ex_mem_data_src) is
 			when '0' =>
-				ex_mux_res <= ex_rx;
+				ex_mux_res <= ex_rx_new;
 			when '1' =>
-				ex_mux_res <= ex_ry;
+				ex_mux_res <= ex_ry_new;
 			when others =>
 				ex_mux_res <= (others=>'1');
 				--raise error

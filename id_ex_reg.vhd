@@ -20,7 +20,7 @@ entity id_ex_reg is
 		i_read_mem 		: in std_logic;
 		i_write_mem 	: in std_logic;
 		i_write_reg 	: in std_logic;
-		i_rd 			: in std_logic_vector(2 downto 0);
+		i_rd 			: in std_logic_vector(3 downto 0);
 		i_immd 			: in std_logic_vector(15 downto 0);
 		
 		q_rx 			: out std_logic_vector(15 downto 0);
@@ -37,19 +37,19 @@ entity id_ex_reg is
 		q_read_mem 		: out std_logic;
 		q_write_mem 	: out std_logic;
 		q_write_reg 	: out std_logic;
-		q_rd 			: out std_logic_vector(2 downto 0);
+		q_rd 			: out std_logic_vector(3 downto 0);
 		q_immd 			: out std_logic_vector(15 downto 0)
 	);
 end id_ex_reg; -- id_ex_reg
 
 architecture arch of id_ex_reg is
 	--data
-	signal reg_rx 			: std_logic_vector(15 downto 0):=(others => '0');
-	signal reg_ry 			: std_logic_vector(15 downto 0):=(others => '0');
-	signal reg_pc_res		: std_logic_vector(15 downto 0):=(others => '0');
-	signal reg_immd 		: std_logic_vector(15 downto 0):=(others => '0');
-	signal reg_rx_addr 		: std_logic_vector(3 downto 0);
-	signal reg_ry_addr 		: std_logic_vector(3 downto 0);
+	signal reg_rx 			: std_logic_vector(15 downto 0) :=(others => '0');
+	signal reg_ry 			: std_logic_vector(15 downto 0) :=(others => '0');
+	signal reg_pc_res		: std_logic_vector(15 downto 0) :=(others => '0');
+	signal reg_immd 		: std_logic_vector(15 downto 0) :=(others => '0');
+	signal reg_rx_addr 		: std_logic_vector(3 downto 0) := (others => '0');
+	signal reg_ry_addr 		: std_logic_vector(3 downto 0) := (others => '0');
 
 	--control
 	signal reg_mem_data_src	: std_logic:='0';
@@ -60,7 +60,7 @@ architecture arch of id_ex_reg is
 	signal reg_read_mem 	: std_logic:='0';
 	signal reg_write_mem 	: std_logic:='0';
 	signal reg_write_reg 	: std_logic:='0';
-	signal reg_rd 			: std_logic_vector(2 downto 0):=(others => '0');
+	signal reg_rd 			: std_logic_vector(3 downto 0):=(others => '0');
 	
 
 begin

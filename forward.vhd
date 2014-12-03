@@ -17,7 +17,8 @@ end entity ; -- forward
 architecture arch of forward is
 
 begin
-	process(i_me_write_reg, i_wb_write_reg)
+	process(i_me_write_reg, i_wb_write_reg, 
+			i_me_rd, i_wb_rd, i_ex_rx_addr, i_ex_ry_addr)
 	begin
 		q_forward_a <= "00";
 		q_forward_b <= "00";
