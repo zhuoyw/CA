@@ -12,8 +12,7 @@ entity me_wb_reg is
 		--control
 		i_mem_to_reg 	: in std_logic;
 		i_write_reg 	: in std_logic;
-		i_write_ext 	: in std_logic;
-		i_rd 			: in std_logic_vector(2 downto 0);
+		i_rd 			: in std_logic_vector(3 downto 0);
 		
 		--data
 		q_alu_res		: out std_logic_vector(15 downto 0);
@@ -22,8 +21,7 @@ entity me_wb_reg is
 		--control
 		q_mem_to_reg 	: out std_logic;
 		q_write_reg 	: out std_logic;
-		q_write_ext 	: out std_logic;
-		q_rd 			: out std_logic_vector(2 downto 0)
+		q_rd 			: out std_logic_vector(3 downto 0)
 
 	);
 end me_wb_reg; -- me_wb_reg
@@ -36,8 +34,7 @@ architecture arch of me_wb_reg is
 	--control
 	signal reg_mem_to_reg 	: std_logic:='0';
 	signal reg_write_reg 	: std_logic:='0';
-	signal reg_write_ext 	: std_logic:='0';
-	signal reg_rd 			: std_logic_vector(2 downto 0):=(others => '0');
+	signal reg_rd 			: std_logic_vector(3 downto 0):=(others => '0');
 
 begin
 
@@ -50,7 +47,6 @@ begin
 			--control
 			reg_mem_to_reg <= i_mem_to_reg;
 			reg_write_reg <= i_write_reg;
-			reg_write_ext <= i_write_ext;
 			reg_rd <= i_rd;
 		end if;
 	end process;
@@ -61,7 +57,6 @@ begin
 	--control
 	q_mem_to_reg <= reg_mem_to_reg;
 	q_write_reg <= reg_write_reg;
-	q_write_ext <= reg_write_ext;
 	q_rd <= reg_rd;
 	
 end arch;

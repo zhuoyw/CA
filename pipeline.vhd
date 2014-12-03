@@ -44,16 +44,17 @@ architecture arch of pipeline is
 	signal id_rx 			: std_logic_vector(15 downto 0);
 	signal id_ry 			: std_logic_vector(15 downto 0);
 	signal id_t 			: std_logic_vector(15 downto 0);
-	signal id_ra 			: std_logic_vector(15 downto 0);
-	signal id_sp			: std_logic_vector(15 downto 0);
-	signal id_ih 			: std_logic_vector(15 downto 0);
+	signal id_ra  			: std_logic_vector(15 downto 0);
+
+	signal id_rx_addr 		: std_logic_vector(3 downto 0);
+	signal id_ry_addr 		: std_logic_vector(3 downto 0);
 
 	--control
 	--control pc
 	signal id_branch		: std_logic_vector(2 downto 0);
 	--control alu
 	signal id_mem_data_src  : std_logic;
-	signal id_alu_src_a		: std_logic_vector(2 downto 0);
+	signal id_alu_src_a		: std_logic;
 	signal id_alu_src_b		: std_logic;
 	signal id_alu_opcode	: std_logic_vector(3 downto 0);
 	--control mem
@@ -61,32 +62,33 @@ architecture arch of pipeline is
 	signal id_write_mem		: std_logic;
 	--control reg_file
 	signal id_write_reg		: std_logic;
-	signal id_write_ext		: std_logic;
 	--control wb
-	signal id_rd 			: std_logic_vector(2 downto 0);
+	signal id_rd 			: std_logic_vector(3 downto 0);
 	signal id_mem_to_reg	: std_logic;
 
 	--data ex
 	signal ex_immd			: std_logic_vector(15 downto 0);
 	signal ex_rx 			: std_logic_vector(15 downto 0);
 	signal ex_ry 			: std_logic_vector(15 downto 0);
-	signal ex_ra 			: std_logic_vector(15 downto 0);
-	signal ex_sp			: std_logic_vector(15 downto 0);
-	signal ex_ih 			: std_logic_vector(15 downto 0);
 	signal ex_alu_a 		: std_logic_vector(15 downto 0);
 	signal ex_alu_b 		: std_logic_vector(15 downto 0);
 	signal ex_pc_res 		: std_logic_vector(15 downto 0);
+
+	signal ex_rx_addr 		: std_logic_vector(3 downto 0);
+	signal ex_ry_addr 		: std_logic_vector(3 downto 0);
 	--control ex 
 	signal ex_mem_data_src	: std_logic;
-	signal ex_alu_src_a		: std_logic_vector(2 downto 0);
+	signal ex_alu_src_a		: std_logic;
 	signal ex_alu_src_b		: std_logic;
-	signal ex_alu_opcode		: std_logic_vector(3 downto 0);
+	signal ex_alu_opcode	: std_logic_vector(3 downto 0);
 	signal ex_read_mem		: std_logic;
 	signal ex_write_mem		: std_logic;
 	signal ex_write_reg		: std_logic;
-	signal ex_write_ext		: std_logic;
-	signal ex_rd 			: std_logic_vector(2 downto 0);
+	signal ex_rd 			: std_logic_vector(3 downto 0);
 	signal ex_mem_to_reg	: std_logic;
+	signal ex_forward_a 	: std_logic_vector(1 downto 0);
+	signal ex_forward_b 	: std_logic_vector(1 downto 0);
+
 	--data ex out
 	signal ex_alu_res		: std_logic_vector(15 downto 0);
 	signal ex_mux_res		: std_logic_vector(15 downto 0);
@@ -101,18 +103,16 @@ architecture arch of pipeline is
 	signal me_mem_res		: std_logic_vector(15 downto 0);
 	signal me_alu_res		: std_logic_vector(15 downto 0);
 	--control me out
-	signal me_write_reg	: std_logic;
-	signal me_write_ext	: std_logic;
-	signal me_rd 			: std_logic_vector(2 downto 0);
+	signal me_write_reg		: std_logic;
+	signal me_rd 			: std_logic_vector(3 downto 0);
 	signal me_mem_to_reg	: std_logic;
 
 	--data wb in
 	signal wb_mem_res		: std_logic_vector(15 downto 0);
 	signal wb_alu_res		: std_logic_vector(15 downto 0);
 	--control wb in 
-	signal wb_write_reg	: std_logic;
-	signal wb_write_ext	: std_logic;
-	signal wb_rd 			: std_logic_vector(2 downto 0);
+	signal wb_write_reg		: std_logic;
+	signal wb_rd 			: std_logic_vector(3 downto 0);
 	signal wb_mem_to_reg	: std_logic;
 	--data wb out
 	signal wb_mux_res	: std_logic_vector(15 downto 0);
@@ -150,41 +150,37 @@ architecture arch of pipeline is
 		--data
 		i_rx 			: in std_logic_vector(15 downto 0);
 		i_ry 			: in std_logic_vector(15 downto 0);
-		i_ra 			: in std_logic_vector(15 downto 0);
-		i_sp 			: in std_logic_vector(15 downto 0);
-		i_ih 			: in std_logic_vector(15 downto 0);
 		i_pc_res		: in std_logic_vector(15 downto 0);
+		i_rx_addr 		: in std_logic_vector(3 downto 0);
+		i_ry_addr 		: in std_logic_vector(3 downto 0);
 		--control id
 		i_mem_data_src	: in std_logic;
-		i_alu_src_a 	: in std_logic_vector(2 downto 0);
+		i_alu_src_a 	: in std_logic;
 		i_alu_src_b 	: in std_logic;
 		i_alu_opcode 	: in std_logic_vector(3 downto 0);
 		i_mem_to_reg 	: in std_logic;
 		i_read_mem 		: in std_logic;
 		i_write_mem 	: in std_logic;
 		i_write_reg 	: in std_logic;
-		i_write_ext 	: in std_logic;
-		i_rd 			: in std_logic_vector(2 downto 0);
+		i_rd 			: in std_logic_vector(3 downto 0);
 		i_immd 			: in std_logic_vector(15 downto 0);
 		
 		q_rx 			: out std_logic_vector(15 downto 0);
 		q_ry 			: out std_logic_vector(15 downto 0);
-		q_ra 			: out std_logic_vector(15 downto 0);
-		q_sp 			: out std_logic_vector(15 downto 0);
-		q_ih 			: out std_logic_vector(15 downto 0);
 		q_pc_res		: out std_logic_vector(15 downto 0);
-		
+		q_immd 			: out std_logic_vector(15 downto 0);
+		q_rx_addr 		: in std_logic_vector(3 downto 0);
+		q_ry_addr 		: in std_logic_vector(3 downto 0);
+
 		q_mem_data_src	: out std_logic;
-		q_alu_src_a 	: out std_logic_vector(2 downto 0);
+		q_alu_src_a 	: out std_logic;
 		q_alu_src_b 	: out std_logic;
 		q_alu_opcode 	: out std_logic_vector(3 downto 0);
 		q_mem_to_reg 	: out std_logic;
 		q_read_mem 		: out std_logic;
 		q_write_mem 	: out std_logic;
 		q_write_reg 	: out std_logic;
-		q_write_ext 	: out std_logic;
-		q_rd 			: out std_logic_vector(2 downto 0);
-		q_immd 			: out std_logic_vector(15 downto 0)
+		q_rd 			: out std_logic_vector(3 downto 0)
 	);
 	end component;
 
@@ -200,8 +196,7 @@ architecture arch of pipeline is
 		i_read_mem 		: in std_logic;
 		i_write_mem 	: in std_logic;
 		i_write_reg 	: in std_logic;
-		i_write_ext 	: in std_logic;
-		i_rd 			: in std_logic_vector(2 downto 0);
+		i_rd 			: in std_logic_vector(3 downto 0);
 		
 		--data
 		q_alu_res		: out std_logic_vector(15 downto 0);
@@ -212,8 +207,7 @@ architecture arch of pipeline is
 		q_read_mem 		: out std_logic;
 		q_write_mem 	: out std_logic;
 		q_write_reg 	: out std_logic;
-		q_write_ext 	: out std_logic;
-		q_rd 			: out std_logic_vector(2 downto 0)
+		q_rd 			: out std_logic_vector(3 downto 0)
 
 	);
 	end component; -- ex_me_reg
@@ -228,8 +222,7 @@ architecture arch of pipeline is
 		--control
 		i_mem_to_reg 	: in std_logic;
 		i_write_reg 	: in std_logic;
-		i_write_ext 	: in std_logic;
-		i_rd 			: in std_logic_vector(2 downto 0);
+		i_rd 			: in std_logic_vector(3 downto 0);
 		
 		--data
 		q_alu_res		: out std_logic_vector(15 downto 0);
@@ -238,8 +231,7 @@ architecture arch of pipeline is
 		--control
 		q_mem_to_reg 	: out std_logic;
 		q_write_reg 	: out std_logic;
-		q_write_ext 	: out std_logic;
-		q_rd 			: out std_logic_vector(2 downto 0)
+		q_rd 			: out std_logic_vector(3 downto 0)
 
 	);
 	end component; -- me_wb_reg
@@ -248,27 +240,16 @@ architecture arch of pipeline is
 	port(
 		i_clk		: in std_logic;
 		write_reg	: in std_logic;
-		i_addr		: in std_logic_vector(2 downto 0);
+		i_addr		: in std_logic_vector(3 downto 0);
 		i_data		: in std_logic_vector(15 downto 0);		
-		i_rx		: in std_logic_vector(2 downto 0);
-		i_ry		: in std_logic_vector(2 downto 0);
+		i_rx_addr	: in std_logic_vector(3 downto 0);
+		i_ry_addr	: in std_logic_vector(3 downto 0);
 		q_rx		: out std_logic_vector(15 downto 0);
-		q_ry		: out std_logic_vector(15 downto 0)	
+		q_ry		: out std_logic_vector(15 downto 0);
+		q_t 		: out std_logic_vector(15 downto 0);
+		q_ra 		: out std_logic_vector(15 downto 0)
 	);
 	end component;
-
-	component ext_file
-  	port (
-		i_clk		: in std_logic;
-		write_ext	: in std_logic;
-		i_addr		: in std_logic_vector(2 downto 0);
-		i_data		: in std_logic_vector(15 downto 0);		
-		q_t 		: out std_logic_vector(15 downto 0);
-		q_ra 		: out std_logic_vector(15 downto 0);
-		q_sp		: out std_logic_vector(15 downto 0);
-		q_ih		: out std_logic_vector(15 downto 0)
-	);
-	end component; -- ext_file
 
 	component alu
     port (
@@ -297,7 +278,6 @@ architecture arch of pipeline is
 		read_mem		: out std_logic;
 		write_mem		: out std_logic;
 		write_reg		: out std_logic;
-		write_ext		: out std_logic;
 		--rd 			: "000"~"111"->r0~r7; "001"->ra; "010"->sp;	"011"->ih; "000"->t			
 		rd          	: out std_logic_vector(2 downto 0);
 		immd			: out std_logic_vector(15 downto 0)
@@ -336,6 +316,19 @@ architecture arch of pipeline is
 		sram_en 			: out std_logic
     );
 	end component;
+
+	component forward is
+	port (
+		i_ex_rx_addr 		: in std_logic_vector(3 downto 0);
+		i_ex_ry_addr		: in std_logic_vector(3 downto 0);
+		i_me_rd				: in std_logic_vector(3 downto 0);
+		i_wb_rd 			: in std_logic_vector(3 downto 0);
+		i_me_write_reg		: in std_logic;
+		i_wb_write_reg		: in std_logic;
+		q_forward_a			: out std_logic_vector(1 downto 0);
+		q_forward_b			: out std_logic_vector(1 downto 0)
+	) ;
+	end component ; -- forward
 
 begin
 	--clock
@@ -405,7 +398,6 @@ begin
 	u_controller: controller
 	port map(
 		inst => id_inst,
-
 		branch => id_branch,
 		mem_data_src => id_mem_data_src,
 		alu_src_a => id_alu_src_a,
@@ -415,7 +407,6 @@ begin
 		read_mem => id_read_mem,
 		write_mem => id_write_mem,		
 		write_reg => id_write_reg,
-		write_ext => id_write_ext,
 		rd => id_rd,
 		immd => id_immd
 	);
@@ -461,22 +452,12 @@ begin
 		write_reg => wb_write_reg,
 		i_addr => wb_rd,
 		i_data => wb_mux_res, 
-		i_rx => id_inst(10 downto 8), 
-		i_ry => id_inst(7 downto 5),
+		i_rx_addr => id_rx_addr, 
+		i_ry_addr => id_ry_addr,
 		q_rx => id_rx,
-		q_ry => id_ry
-	);
-	
-	u_ext_file: ext_file 
-	port map(
-		i_clk => sys_clk,
-		write_ext => wb_write_ext,
-		i_addr => wb_rd,
-		i_data => wb_mux_res, 
+		q_ry => id_ry,
 		q_t => id_t,
-		q_ra => id_ra,
-		q_sp => id_sp,
-		q_ih => id_ih
+		q_ra => id_ra
 	);
 
 	--id/ex
@@ -486,10 +467,9 @@ begin
 		--data
 		i_rx => id_rx,
 		i_ry =>	id_ry,
-		i_ra => id_ra,
-		i_sp => id_sp,
-		i_ih => id_ih,
 		i_pc_res => id_pc_res,
+		i_rx_addr => id_rx_addr,
+		i_ry_addr => id_ry_addr,
 		--control id
 		i_mem_data_src => id_mem_data_src,
 		i_alu_src_a => id_alu_src_a,
@@ -499,16 +479,17 @@ begin
 		i_read_mem => id_read_mem,
 		i_write_mem => id_write_mem,
 		i_write_reg => id_write_reg,
-		i_write_ext => id_write_ext,
 		i_rd => id_rd,
 		i_immd => id_immd,
 		
+		--out
+		--data
 		q_rx => ex_rx,
 		q_ry => ex_ry,
-		q_ra => ex_ra,
-		q_sp => ex_sp,
-		q_ih => ex_ih,
 		q_pc_res => ex_pc_res,
+		q_rx_addr => ex_rx_addr,
+		q_ry_addr => ex_ry_addr,
+		--control
 		q_mem_data_src => ex_mem_data_src,
 		q_alu_src_a => ex_alu_src_a,
 		q_alu_src_b => ex_alu_src_b,
@@ -517,31 +498,33 @@ begin
 		q_read_mem => ex_read_mem,
 		q_write_mem => ex_write_mem,
 		q_write_reg => ex_write_reg,
-		q_write_ext => ex_write_ext,
 		q_rd => ex_rd,
 		q_immd => ex_immd
 	);
 
 	--ex
-	process(ex_alu_src_a, ex_rx, ex_ry, ex_ra, ex_sp, ex_pc_res, ex_ih)
+	u_forward: forward
+	port map(
+		i_ex_rx_addr => ex_rx_addr,
+		i_ex_ry_addr => ex_ry_addr,
+		i_me_rd => me_rd, 
+		i_wb_rd => wb_rd,
+		i_me_write_reg => me_write_reg,
+		i_wb_write_reg => wb_write_reg,
+		q_forward_a => ex_forward_a,
+		q_forward_b => ex_forward_b
+	);
+
+	process(ex_alu_src_a, ex_rx, ex_pc_res)
 	begin
 		case ex_alu_src_a is
-			when "000" => 
+			when '0' => 
 				ex_alu_a <= ex_rx;
-			when "001" =>
-				ex_alu_a <= ex_ry;
-			when "010" =>
-				ex_alu_a <= ex_ra;
-			when "011" =>
-				ex_alu_a <= ex_sp;
-			when "100"  =>
+			when '1' =>
 				ex_alu_a <= ex_pc_res;
-			when "101" =>
-				ex_alu_a <= (others=>'0');
-			when "110" =>
-				ex_alu_a <= ex_ih;
 			when others => 
-				ex_alu_a <= (others=>'0'); 
+				ex_alu_a <= (others=>'1'); 
+				--raise error
 		end case;
 	end process;
 
@@ -553,7 +536,7 @@ begin
 			when '1' =>
 				ex_alu_b <= ex_ry;
 			when others =>
-				ex_alu_b <= ex_immd;
+				ex_alu_b <= (others=>'1');
 				--raise error
 		end case;
 	end process;
@@ -591,7 +574,6 @@ begin
 		i_read_mem => ex_read_mem,
 		i_write_mem => ex_write_mem,
 		i_write_reg => ex_write_reg,
-		i_write_ext => ex_write_ext,
 		i_rd => ex_rd,
 		
 		q_alu_res => me_alu_res,
@@ -600,7 +582,6 @@ begin
 		q_read_mem => me_read_mem,
 		q_write_mem => me_write_mem,
 		q_write_reg => me_write_reg,
-		q_write_ext => me_write_ext,
 		q_rd => me_rd
 	);
 
@@ -631,14 +612,12 @@ begin
 		--control
 		i_mem_to_reg => me_mem_to_reg,
 		i_write_reg => me_write_reg,
-		i_write_ext => me_write_ext,
 		i_rd => me_rd,
 		
 		q_mem_res => wb_mem_res,
 		q_alu_res => wb_alu_res,
 		q_mem_to_reg => wb_mem_to_reg,
 		q_write_reg => wb_write_reg,
-		q_write_ext => wb_write_ext,
 		q_rd => wb_rd
 	);
 

@@ -14,8 +14,7 @@ entity ex_me_reg is
 		i_read_mem 		: in std_logic;
 		i_write_mem 	: in std_logic;
 		i_write_reg 	: in std_logic;
-		i_write_ext 	: in std_logic;
-		i_rd 			: in std_logic_vector(2 downto 0);
+		i_rd 			: in std_logic_vector(3 downto 0);
 		
 		--data
 		q_alu_res		: out std_logic_vector(15 downto 0);
@@ -26,8 +25,7 @@ entity ex_me_reg is
 		q_read_mem 		: out std_logic;
 		q_write_mem 	: out std_logic;
 		q_write_reg 	: out std_logic;
-		q_write_ext 	: out std_logic;
-		q_rd 			: out std_logic_vector(2 downto 0)
+		q_rd 			: out std_logic_vector(3 downto 0)
 
 	);
 end ex_me_reg; -- ex_me_reg
@@ -42,8 +40,7 @@ architecture arch of ex_me_reg is
 	signal reg_read_mem 	: std_logic:='0';
 	signal reg_write_mem 	: std_logic:='0';
 	signal reg_write_reg 	: std_logic:='0';
-	signal reg_write_ext 	: std_logic:='0';
-	signal reg_rd 			: std_logic_vector(2 downto 0):=(others => '0');
+	signal reg_rd 			: std_logic_vector(3 downto 0):=(others => '0');
 
 begin
 
@@ -58,7 +55,6 @@ begin
 			reg_read_mem <= i_read_mem;
 			reg_write_mem <= i_write_mem;
 			reg_write_reg <= i_write_reg;
-			reg_write_ext <= i_write_ext;
 			reg_rd <= i_rd;
 		end if;
 	end process;
@@ -71,6 +67,6 @@ begin
 	q_read_mem <= reg_read_mem;
 	q_write_mem <= reg_write_mem;
 	q_write_reg <= reg_write_reg;
-	q_write_ext <= reg_write_ext;
 	q_rd <= reg_rd;
+	
 end arch;
