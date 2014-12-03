@@ -18,7 +18,10 @@ entity pipeline is
 	sram1_addr 		: out std_logic_vector(15 downto 0);
 	sram1_oe 		: out std_logic;
 	sram1_we 		: out std_logic;
-	sram1_en 		: out std_logic
+	sram1_en 		: out std_logic;
+	
+	wrn				: out std_logic;
+	rdn				: out std_logic
   ) ;
 end entity ; -- pipeline
 
@@ -335,6 +338,9 @@ architecture arch of pipeline is
 	end component ; -- forward
 
 begin
+	wrn <= '1';
+	rdn <= '1';
+	
 	--clock
 	u_clock: clock
 	port map(
