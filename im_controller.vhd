@@ -39,10 +39,15 @@ begin
 					reg_state <= r2;
 					sram_oe <= '0';
 				when r2 =>
-					reg_state <= s0;
+					reg_state <= r3;
 					sram_oe <= '1';
 					sram_we <= '1';
 					q_data <= sram_data;
+				when r3 =>
+					reg_state <= s0;
+					sram_en <= '1';
+					sram_oe <= '1';
+					sram_we <= '1';
 				when others =>
 					reg_state <= s0;
 					sram_en <= '1';

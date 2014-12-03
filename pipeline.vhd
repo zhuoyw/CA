@@ -91,8 +91,8 @@ architecture arch of pipeline is
 	signal ex_write_reg		: std_logic;
 	signal ex_rd 			: std_logic_vector(3 downto 0);
 	signal ex_mem_to_reg	: std_logic;
-	signal ex_forward_a 	: std_logic_vector(1 downto 0);
-	signal ex_forward_b 	: std_logic_vector(1 downto 0);
+	signal ex_forward_x 	: std_logic_vector(1 downto 0);
+	signal ex_forward_y 	: std_logic_vector(1 downto 0);
 
 	--data ex out
 	signal ex_alu_res		: std_logic_vector(15 downto 0);
@@ -332,8 +332,8 @@ architecture arch of pipeline is
 		i_wb_rd 			: in std_logic_vector(3 downto 0);
 		i_me_write_reg		: in std_logic;
 		i_wb_write_reg		: in std_logic;
-		q_forward_a			: out std_logic_vector(1 downto 0);
-		q_forward_b			: out std_logic_vector(1 downto 0)
+		q_forward_x			: out std_logic_vector(1 downto 0);
+		q_forward_y			: out std_logic_vector(1 downto 0)
 	) ;
 	end component ; -- forward
 
@@ -523,14 +523,14 @@ begin
 		i_wb_rd => wb_rd,
 		i_me_write_reg => me_write_reg,
 		i_wb_write_reg => wb_write_reg,
-		q_forward_a => ex_forward_a,
-		q_forward_b => ex_forward_b
+		q_forward_x => ex_forward_x,
+		q_forward_y => ex_forward_y
 	);
 
 
-	process(ex_forward_a, ex_rx, me_alu_res, wb_mux_res)
+	process(ex_forward_x, ex_rx, me_alu_res, wb_mux_res)
 	begin
-		case(ex_forward_a) is
+		case(ex_forward_x) is
 			when "00" =>
 				ex_rx_new <= ex_rx;
 			when "01" =>
@@ -542,9 +542,9 @@ begin
 		end case;
 	end process;
 
-	process(ex_forward_b, ex_ry, me_alu_res, wb_mux_res)
+	process(ex_forward_y, ex_ry, me_alu_res, wb_mux_res)
 	begin
-		case(ex_forward_b) is
+		case(ex_forward_y) is
 			when "00" =>
 				ex_ry_new <= ex_ry;
 			when "01" =>

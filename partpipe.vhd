@@ -7,21 +7,7 @@ entity pipeline is
   port (
 	clk				: in std_logic;
 	rst				: in std_logic;
-
-	sram0_data 		: inout std_logic_vector(15 downto 0);
-	sram0_addr 		: out std_logic_vector(15 downto 0);
-	sram0_oe 		: out std_logic;
-	sram0_we 		: out std_logic;
-	sram0_en 		: out std_logic;
-
-	sram1_data 		: inout std_logic_vector(15 downto 0);
-	sram1_addr 		: out std_logic_vector(15 downto 0);
-	sram1_oe 		: out std_logic;
-	sram1_we 		: out std_logic;
-	sram1_en 		: out std_logic;
-	
-	wrn				: out std_logic;
-	rdn				: out std_logic
+	if_inst			: std_logic_vector(15 downto 0)
   ) ;
 end entity ; -- pipeline
 
@@ -35,7 +21,6 @@ architecture arch of pipeline is
 	signal if_pc_plus_4		: std_logic_vector(15 downto 0);
 		
 	signal if_pc_res		: std_logic_vector(15 downto 0);
-	signal if_inst			: std_logic_vector(15 downto 0);
 
 	--data id
 	signal id_pc_src		: std_logic_vector(1 downto 0);

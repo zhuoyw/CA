@@ -23,7 +23,7 @@ end sram_controller;
 
 architecture bhv of sram_controller is
 	
-	type state_tpye is (s0, r1, r2, r3, w1, w2, w3);
+	type state_tpye is (s0, r1, r2, w1, w2);
 	signal reg_state : state_tpye := s0;
 
 begin

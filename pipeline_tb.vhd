@@ -32,6 +32,18 @@ BEGIN
 		clock <= '1';
 		wait for clocktime/2;
 		clock <= '0';
+		wait for clocktime/2;
+		clock <= '1';
+		wait for clocktime/2;
+		clock <= '0';
+		wait for clocktime/2;
+		clock <= '1';
+		wait for clocktime/2;
+		clock <= '0';
+		wait for clocktime/2;
+		clock <= '1';
+		wait for clocktime/2;
+		clock <= '0';
    end process;
  
 
