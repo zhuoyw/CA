@@ -95,11 +95,11 @@ begin
     process(wire_sub)
     begin
         if wire_sub = "0000000000000000" then 
-            wire_equ <= "0000000000000001";
-            wire_lt <= "0000000000000000";
-        elsif wire_sub(15) = '1' then 
             wire_equ <= "0000000000000000";
             wire_lt <= "0000000000000001";
+        elsif wire_sub(15) = '1' then 
+            wire_equ <= "0000000000000001";
+            wire_lt <= "0000000000000000";
         else 
             wire_equ <= "0000000000000000";
             wire_lt <= "0000000000000000";
