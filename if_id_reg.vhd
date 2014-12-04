@@ -5,6 +5,8 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 entity if_id_reg is
   port (
 		i_clk 		: in std_logic; 
+		i_rst  		: in std_logic;
+		i_stall 	: in std_logic;
 		i_inst 		: in std_logic_vector(15 downto 0);
 		i_pc_res 	: in std_logic_vector(15 downto 0);
 
@@ -21,9 +23,14 @@ begin
 
 	process(i_clk)
 	begin
-		if (i_clk'event and i_clk = '1') then			
-			reg_inst <= i_inst;
-			reg_pc_res <= i_pc_res;
+		if (i_rst = '1') then
+			reg_inst <= (others => '0');
+			reg_pc_res <= (others => '0');
+		elsif (i_clk'event and i_clk = '1') then
+			if (i_stall = '0') then			
+				reg_inst <= i_inst;
+				reg_pc_res <= i_pc_res;
+			end if;--do nothing to hold on
 		end if;
 	end process;
 	

@@ -25,24 +25,38 @@ end entity ; -- reg_file
 
 architecture arch of reg_file is
 
+	signal counter : integer range 0 to 4 := 0;
 	type regfile_type is array(0 to 15) of std_logic_vector(15 downto 0);
 	signal regfile : regfile_type := (others => (others => '0'));
+
+	constant addr_t	        : std_logic_vector(3 downto 0) := "1000";
+    constant addr_ra	    : std_logic_vector(3 downto 0) := "1001";
+    constant addr_sp	    : std_logic_vector(3 downto 0) := "1010";
+    constant addr_ih	    : std_logic_vector(3 downto 0) := "1011";
 
 begin
 
 	process(i_clk)
 	begin
 		if (i_clk = '1' and i_clk'event) then
-			if (write_reg = '1') then
-				regfile(conv_integer(i_addr)) <= i_data;
+			if (counter = 3) then
+				counter <= 0;
+			else
+				if (counter = 1) then	
+					--counter <= counter + 1;
+					if (write_reg = '1') then
+						regfile(conv_integer(i_addr)) <= i_data;
+					end if;
+				end if;
+				counter <= counter + 1;
 			end if;
 		end if;
 	end process ; -- 
 
 	q_rx <= regfile(conv_integer(i_rx_addr));
 	q_ry <= regfile(conv_integer(i_ry_addr));
-	q_t <= regfile(8);
-	q_ra <= regfile(9);
+	q_t  <= regfile(conv_integer(addr_t));
+	q_ra <= regfile(conv_integer(addr_ra));
 	
 end architecture ; -- arch
 

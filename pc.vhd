@@ -5,6 +5,7 @@ entity pc is
 	port (
 		i_clk		: in std_logic;
 		i_rst		: in std_logic;
+		i_stall 	: in std_logic;
 		i_pc		: in std_logic_vector(15 downto 0);
 		q_pc		: out std_logic_vector(15 downto 0)
 	);
@@ -21,7 +22,9 @@ begin
 		if (i_rst = '1') then
 			reg_pc <= (others => '0');
 		elsif (i_clk = '1' and i_clk'event) then
-			reg_pc <= i_pc;
+			if (i_stall = '0') then
+				reg_pc <= i_pc;
+			end if; -- do nothing to hold on
 		end if;
 	end process;
 

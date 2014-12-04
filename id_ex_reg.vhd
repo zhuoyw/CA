@@ -5,6 +5,7 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 entity id_ex_reg is
   port (
 		i_clk 		: in std_logic;
+		i_stall  	: in std_logic;
 		--data
 		i_rx 			: in std_logic_vector(15 downto 0);
 		i_ry 			: in std_logic_vector(15 downto 0);
@@ -67,24 +68,31 @@ begin
 
 	process(i_clk)
 	begin
-		if (i_clk'event and i_clk = '1') then			
-			--data
-			reg_rx <= i_rx;
-			reg_ry <= i_ry;
-			reg_immd <= i_immd;
-			reg_pc_res <= i_pc_res;
-			reg_rx_addr <= i_rx_addr;
-			reg_ry_addr <= i_ry_addr;
-			--control id
-			reg_mem_data_src <= i_mem_data_src;
-			reg_alu_src_a <= i_alu_src_a;
-			reg_alu_src_b <= i_alu_src_b;
-			reg_alu_opcode <= i_alu_opcode;
-			reg_mem_to_reg <= i_mem_to_reg;
-			reg_read_mem <= i_read_mem;
-			reg_write_mem <= i_write_mem;
-			reg_write_reg <= i_write_reg;
-			reg_rd <= i_rd;
+		if (i_clk'event and i_clk = '1') then
+			if (i_stall = '0') then			
+				--data
+				reg_rx <= i_rx;
+				reg_ry <= i_ry;
+				reg_immd <= i_immd;
+				reg_pc_res <= i_pc_res;
+				reg_rx_addr <= i_rx_addr;
+				reg_ry_addr <= i_ry_addr;
+				--control id
+				reg_mem_data_src <= i_mem_data_src;
+				reg_alu_src_a <= i_alu_src_a;
+				reg_alu_src_b <= i_alu_src_b;
+				reg_alu_opcode <= i_alu_opcode;
+				reg_mem_to_reg <= i_mem_to_reg;
+				reg_read_mem <= i_read_mem;
+				reg_write_mem <= i_write_mem;
+				reg_write_reg <= i_write_reg;
+				reg_rd <= i_rd;
+			else -- do something to shut off
+				reg_read_mem <= '0';
+				reg_write_mem <= '0';
+				reg_write_reg <= '0';
+				--reg_rd <= (others => '0');
+			end if;
 		end if;
 	end process;
 	

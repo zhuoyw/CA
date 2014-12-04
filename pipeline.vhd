@@ -30,6 +30,8 @@ architecture arch of pipeline is
 	--clock
 	signal sys_clk 		: std_logic;
 	
+	signal stall 		: std_logic;
+
 	--data if
 	signal if_pc_mux_res	: std_logic_vector(15 downto 0);
 	signal if_pc_plus_4		: std_logic_vector(15 downto 0);
@@ -133,6 +135,7 @@ architecture arch of pipeline is
 	port (
 		i_clk		: in std_logic;
 		i_rst		: in std_logic;
+		i_stall 	: in std_logic;
 		i_pc		: in std_logic_vector(15 downto 0);
 		q_pc		: out std_logic_vector(15 downto 0)
 	);
@@ -141,6 +144,8 @@ architecture arch of pipeline is
 	component if_id_reg 
 	port (
 		i_clk 		: in std_logic; 
+		i_rst 		: in std_logic;
+		i_stall 	: in std_logic;
 		i_inst 		: in std_logic_vector(15 downto 0);
 		i_pc_res 	: in std_logic_vector(15 downto 0);
 
@@ -152,6 +157,7 @@ architecture arch of pipeline is
 	component id_ex_reg
 	port (
 		i_clk 			: in std_logic;
+		i_stall			: in std_logic;
 		--data
 		i_rx 			: in std_logic_vector(15 downto 0);
 		i_ry 			: in std_logic_vector(15 downto 0);
@@ -217,7 +223,7 @@ architecture arch of pipeline is
 	);
 	end component; -- ex_me_reg
 
-	component me_wb_reg is
+	component me_wb_reg
 	port (
 		i_clk 			: in std_logic;
 		--data
@@ -267,7 +273,7 @@ architecture arch of pipeline is
     );
 	end component;
 
-	component controller is
+	component controller
 		port (
 			inst			: in std_logic_vector(15 downto 0);
 			branch			: out std_logic_vector(2 downto 0);
@@ -291,7 +297,7 @@ architecture arch of pipeline is
 		  ) ;
 	end component;
 
-	component im_controller is
+	component im_controller
 	port (
 		--from/to upper
 		i_clk			: in std_logic;
@@ -324,7 +330,7 @@ architecture arch of pipeline is
     );
 	end component;
 
-	component forward is
+	component forward
 	port (
 		i_ex_rx_addr 		: in std_logic_vector(3 downto 0);
 		i_ex_ry_addr		: in std_logic_vector(3 downto 0);
@@ -336,6 +342,16 @@ architecture arch of pipeline is
 		q_forward_y			: out std_logic_vector(1 downto 0)
 	) ;
 	end component ; -- forward
+
+	component hazard is
+	port (
+		i_id_rx_addr	: std_logic_vector(3 downto 0);
+		i_id_ry_addr	: std_logic_vector(3 downto 0);
+		i_ex_rd 		: std_logic_vector(3 downto 0);
+		i_ex_read_mem	: std_logic;
+		q_stall			: std_logic
+	) ;
+	end component ; -- hazard
 
 begin
 	wrn <= '1';
@@ -354,6 +370,7 @@ begin
 	port map(
 		i_clk => sys_clk,
 		i_rst => rst,
+		i_stall => stall,
 		i_pc => if_pc_mux_res,
 		q_pc => if_pc_res
 	);
@@ -396,6 +413,8 @@ begin
 	u_if_id_reg: if_id_reg 
 	port map(
 		i_clk => sys_clk, 
+		i_rst => rst,
+		i_stall => stall,
 		i_inst => if_inst,
 		i_pc_res => if_pc_res,
 
@@ -404,6 +423,15 @@ begin
 	);
 
 	--id
+	u_hazard: hazard
+	port map(
+		i_id_rx_addr => id_rx_addr,
+		i_id_ry_addr => id_ry_addr,
+		i_ex_rd => ex_rd,
+		i_ex_read_mem => ex_read_mem,
+		q_stall => stall
+	);
+
 	--control
 	u_controller: controller
 	port map(
@@ -476,6 +504,7 @@ begin
 	u_id_ex_reg: id_ex_reg
 	port map(
 		i_clk => sys_clk,
+		i_stall => stall,
 		--data
 		i_rx => id_rx,
 		i_ry =>	id_ry,
