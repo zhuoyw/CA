@@ -9,19 +9,26 @@ entity pipeline is
 	rst				: in std_logic;
 
 	sram0_data 		: inout std_logic_vector(15 downto 0);
+	sram0_reserve	: out std_logic_vector(1 downto 0);
 	sram0_addr 		: out std_logic_vector(15 downto 0);
 	sram0_oe 		: out std_logic;
 	sram0_we 		: out std_logic;
 	sram0_en 		: out std_logic;
 
 	sram1_data 		: inout std_logic_vector(15 downto 0);
+	sram1_reserve	: out std_logic_vector(1 downto 0);
 	sram1_addr 		: out std_logic_vector(15 downto 0);
 	sram1_oe 		: out std_logic;
 	sram1_we 		: out std_logic;
 	sram1_en 		: out std_logic;
 	
 	wrn				: out std_logic;
-	rdn				: out std_logic
+	rdn				: out std_logic;
+	
+	--for debug
+	i_num				: in std_logic_vector(15 downto 0);
+	q_num				: out std_logic_vector(15 downto 0):="0000000000000000"
+	
   ) ;
 end entity ; -- pipeline
 
@@ -372,6 +379,8 @@ architecture arch of pipeline is
 begin
 	wrn <= '1';
 	rdn <= '1';
+	sram0_reserve <= "00";
+	sram1_reserve <= "00";
 	
 	--clock
 	u_clock: clock
@@ -766,5 +775,33 @@ begin
 	end process;
 
 	--IO
+	--FOR DEBUG
+	process(i_num, if_pc_res, if_inst, id_pc_res, id_inst, ex_alu_a, ex_alu_b, ex_alu_res, id_pc_src, id_branch)
+	begin
+		case i_num(4 downto 0) is
+			when "00000" =>
+				q_num <= if_pc_res;
+			when "00001" =>
+				q_num <= if_inst;
+			when "01000" =>
+				q_num(15 downto 14) <= id_pc_src;
+			when "01001" =>
+				q_num <= if_pc_mux_res;
+			when "00010" =>
+				q_num <= ex_alu_a;
+			when "00011" =>
+				q_num <= ex_alu_b;
+			when "00100" =>
+				q_num <= ex_alu_res;
+			when "10000" =>
+				q_num <= me_alu_res;
+			when "10001" =>
+				q_num <= wb_mux_res;
+			when others =>	
+				q_num <= (others => '1');
+				--raise error
+		end case;
+	end process;
+	
 
 end architecture ; -- arch
