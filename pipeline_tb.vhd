@@ -5,7 +5,7 @@ ENTITY pipeline_tb IS
 END pipeline_tb;
  
 ARCHITECTURE behavior OF pipeline_tb IS 
-    COMPONENT partpipe
+    COMPONENT pipeline
     port (
 	clk				: in std_logic;
 	rst				: in std_logic;
@@ -23,7 +23,7 @@ ARCHITECTURE behavior OF pipeline_tb IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: partpipe PORT MAP (clock,reset,inst);
+   uut: pipeline PORT MAP (clock,reset,inst);
 
    -- Clock process definitions
    process

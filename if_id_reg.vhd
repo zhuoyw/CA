@@ -21,7 +21,7 @@ architecture arch of if_id_reg is
 
 begin
 
-	process(i_clk)
+	process(i_clk, i_rst)
 	begin
 		if (i_rst = '1') then
 			reg_inst <= (others => '0');

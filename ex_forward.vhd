@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL; 
 
-entity forward is
+entity ex_forward is
 	port (
 		i_ex_rx_addr 		: in std_logic_vector(3 downto 0);
 		i_ex_ry_addr		: in std_logic_vector(3 downto 0);
@@ -12,9 +12,9 @@ entity forward is
 		q_forward_x			: out std_logic_vector(1 downto 0);
 		q_forward_y			: out std_logic_vector(1 downto 0)
 	) ;
-end entity ; -- forward
+end entity ; -- ex_forward
 
-architecture arch of forward is
+architecture arch of ex_forward is
 
 begin
 	process(i_me_write_reg, i_wb_write_reg, 

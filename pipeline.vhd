@@ -49,8 +49,11 @@ architecture arch of pipeline is
 	signal id_rx 			: std_logic_vector(15 downto 0);
 	signal id_ry 			: std_logic_vector(15 downto 0);
 	signal id_t 			: std_logic_vector(15 downto 0);
-	signal id_ra  			: std_logic_vector(15 downto 0);
+	signal id_t_new 			: std_logic_vector(15 downto 0);
+	signal id_ra 			: std_logic_vector(15 downto 0);
+	signal id_ra_new  		: std_logic_vector(15 downto 0);
 
+	signal id_rx_new 		: std_logic_vector(15 downto 0);
 	signal id_rx_addr 		: std_logic_vector(3 downto 0);
 	signal id_ry_addr 		: std_logic_vector(3 downto 0);
 
@@ -70,6 +73,9 @@ architecture arch of pipeline is
 	--control wb
 	signal id_rd 			: std_logic_vector(3 downto 0);
 	signal id_mem_to_reg	: std_logic;
+	signal id_forward_t		: std_logic;
+	signal id_forward_ra 	: std_logic;
+	signal id_forward_x 	: std_logic;
 
 	--data ex
 	signal ex_immd			: std_logic_vector(15 downto 0);
@@ -330,7 +336,7 @@ architecture arch of pipeline is
     );
 	end component;
 
-	component forward
+	component ex_forward
 	port (
 		i_ex_rx_addr 		: in std_logic_vector(3 downto 0);
 		i_ex_ry_addr		: in std_logic_vector(3 downto 0);
@@ -341,15 +347,25 @@ architecture arch of pipeline is
 		q_forward_x			: out std_logic_vector(1 downto 0);
 		q_forward_y			: out std_logic_vector(1 downto 0)
 	) ;
-	end component ; -- forward
+	end component ; -- ex_forward
+
+	component id_forward is
+	port (
+		i_me_rd  			: in std_logic_vector(3 downto 0);
+		i_id_rx_addr 		: in std_logic_vector(3 downto 0);
+		q_forward_t			: out std_logic;
+		q_forward_x			: out std_logic;
+		q_forward_ra		: out std_logic
+	) ;
+	end component ; -- id_forward
 
 	component hazard is
 	port (
-		i_id_rx_addr	: std_logic_vector(3 downto 0);
-		i_id_ry_addr	: std_logic_vector(3 downto 0);
-		i_ex_rd 		: std_logic_vector(3 downto 0);
-		i_ex_read_mem	: std_logic;
-		q_stall			: std_logic
+		i_id_rx_addr	: in std_logic_vector(3 downto 0);
+		i_id_ry_addr	: in std_logic_vector(3 downto 0);
+		i_ex_rd 		: in std_logic_vector(3 downto 0);
+		i_ex_read_mem	: in std_logic;
+		q_stall			: out std_logic
 	) ;
 	end component ; -- hazard
 
@@ -375,10 +391,55 @@ begin
 		q_pc => if_pc_res
 	);
 
+	u_id_forward: id_forward
+	port map(
+		i_me_rd => me_rd,
+		i_id_rx_addr => id_rx_addr,
+		q_forward_t => id_forward_t,
+		q_forward_ra => id_forward_ra,
+		q_forward_x => id_forward_x
+	);
+
+	process(id_forward_t, id_t, me_alu_res)
+	begin 
+		case(id_forward_t) is
+			when '0' =>
+				id_t_new <= id_t;
+			when '1' =>
+				id_t_new <= me_alu_res;
+			when others =>
+				id_t_new <= id_t;	
+		end case ;
+	end process;
+
+	process(id_forward_ra, id_ra, me_alu_res)
+	begin 
+		case(id_forward_ra) is
+			when '0' =>
+				id_ra_new <= id_ra;
+			when '1' =>
+				id_ra_new <= me_alu_res;
+			when others =>
+				id_ra_new <= id_ra;	
+		end case ;
+	end process;
+
+	process(id_forward_x, id_rx, me_alu_res)
+	begin 
+		case(id_forward_x) is
+			when '0' =>
+				id_rx_new <= id_rx;
+			when '1' =>
+				id_rx_new <= me_alu_res;
+			when others =>
+				id_rx_new <= id_rx;	
+		end case ;
+	end process;
+
 	id_pc_plus_immd <= id_pc_res + id_immd;
 	if_pc_plus_4 <= if_pc_res + "0000000000000001";
 
-	process(id_pc_src, if_pc_plus_4, id_pc_plus_immd, id_rx, id_ra)
+	process(id_pc_src, if_pc_plus_4, id_pc_plus_immd, id_rx_new, id_ra_new)
 	begin
 		case(id_pc_src) is
 			when "00" =>
@@ -386,9 +447,9 @@ begin
 			when "01" =>
 				if_pc_mux_res <= id_pc_plus_immd;
 			when "10" => 
-				if_pc_mux_res <= id_rx;
+				if_pc_mux_res <= id_rx_new;
 			when "11" =>
-				if_pc_mux_res <= id_ra;
+				if_pc_mux_res <= id_ra_new;
 			when others =>
 				if_pc_mux_res <= (others=>'1');
 				--raise error
@@ -451,7 +512,7 @@ begin
 		immd => id_immd
 	);
 
-	process(id_branch, id_t, id_rx)
+	process(id_branch, id_t_new, id_rx_new)
 	begin
 		case(id_branch) is
 			when "000" =>
@@ -459,19 +520,19 @@ begin
 			when "001" => 
 				id_pc_src <= "01";
 			when "010" =>
-				if (id_rx = "0000000000000000") then
+				if (id_rx_new = "0000000000000000") then
 					id_pc_src <= "01";
 				else
 					id_pc_src <= "00";
 				end if;
 			when "011" =>
-				if (id_rx = "0000000000000000") then
+				if (id_rx_new = "0000000000000000") then
 					id_pc_src <= "00";
 				else
 					id_pc_src <= "01";
 				end if;
 			when "100" =>
-				if (id_t = "0000000000000000") then
+				if (id_t_new = "0000000000000000") then
 					id_pc_src <= "01";
 				else
 					id_pc_src <= "00";
@@ -544,7 +605,7 @@ begin
 	);
 
 	--ex
-	u_forward: forward
+	u_forward: ex_forward
 	port map(
 		i_ex_rx_addr => ex_rx_addr,
 		i_ex_ry_addr => ex_ry_addr,
